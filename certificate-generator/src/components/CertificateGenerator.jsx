@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Canvg } from 'canvg';
+import domtoimage from 'dom-to-image'; // Import dom-to-image
 
 const CertificateGenerator = () => {
   const certificateRef = useRef(null);
@@ -35,37 +35,38 @@ const CertificateGenerator = () => {
   };
 
   const handleDownloadCertificate = () => {
-    const certificateSVG = certificateRef.current;
+    const certificate = certificateRef.current;
 
-    if (!certificateSVG) {
+    if (!certificate) {
       alert('Certificate element not found.');
       return;
     }
 
-    // Convert SVG to canvas
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    // Set canvas dimensions
-    canvas.width = certificateSVG.clientWidth;
-    canvas.height = certificateSVG.clientHeight;
-
-    // Render SVG onto canvas using canvg
-    const svgString = new XMLSerializer().serializeToString(certificateSVG);
-    Canvg.from(ctx, svgString).then((v) => {
-      v.start();
-
-      // Convert canvas to image URL
-      const imageURL = canvas.toDataURL('image/png');
-
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = imageURL;
-      link.download = 'certificate.png'; // Set the file name
-      document.body.appendChild(link);
-      link.click(); // Trigger the download
-      document.body.removeChild(link); // Clean up
-    });
+    // Use dom-to-image to convert the certificate div to an image
+    domtoimage
+      .toPng(certificate, {
+        quality: 0.95, // Image quality (0 to 1)
+        bgcolor: null, // Transparent background
+        width: certificate.offsetWidth * 2, // Double the width for better resolution
+        height: certificate.offsetHeight * 2, // Double the height for better resolution
+        style: {
+          transform: 'scale(2)', // Scale up for better quality
+          transformOrigin: 'top left',
+        },
+      })
+      .then((dataUrl) => {
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = 'certificate.png'; // Set the file name
+        document.body.appendChild(link);
+        link.click(); // Trigger the download
+        document.body.removeChild(link); // Clean up
+      })
+      .catch((error) => {
+        console.error('Error generating certificate:', error);
+        alert('Failed to generate certificate. Please try again.');
+      });
   };
 
   const getCertificateDesign = () => {
@@ -73,154 +74,70 @@ const CertificateGenerator = () => {
       case 'Course Completion':
         return {
           title: 'Certificate of Course Completion',
-          backgroundColor: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)',
-          borderColor: '#3B82F6',
-          textColor: '#1E40AF',
+          backgroundColor: 'bg-gradient-to-r from-blue-50 to-blue-100',
+          borderColor: 'border-blue-600',
+          textColor: 'text-blue-800',
           icon: '📚',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <circle cx="20" cy="20" r="5" fill="#3B82F6" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#1E40AF" textAnchor="middle">
-                🎓 Certificate of Course Completion 🎓
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-blue-600',
         };
       case 'Participation':
         return {
           title: 'Certificate of Participation',
-          backgroundColor: 'linear-gradient(135deg, #ECFDF5, #D1FAE5)',
-          borderColor: '#10B981',
-          textColor: '#065F46',
+          backgroundColor: 'bg-gradient-to-r from-green-50 to-green-100',
+          borderColor: 'border-green-600',
+          textColor: 'text-green-800',
           icon: '🎉',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect x="0" y="0" width="20" height="20" fill="#10B981" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#065F46" textAnchor="middle">
-                🎉 Certificate of Participation 🎉
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-green-600',
         };
       case 'Excellence':
         return {
           title: 'Certificate of Excellence',
-          backgroundColor: 'linear-gradient(135deg, #FEF3C7, #FDE68A)',
-          borderColor: '#F59E0B',
-          textColor: '#92400E',
+          backgroundColor: 'bg-gradient-to-r from-yellow-50 to-yellow-100',
+          borderColor: 'border-yellow-600',
+          textColor: 'text-yellow-800',
           icon: '🏆',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <polygon points="20,0 40,40 0,40" fill="#F59E0B" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#92400E" textAnchor="middle">
-                🏆 Certificate of Excellence 🏆
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-yellow-600',
         };
       case 'Leadership':
         return {
           title: 'Certificate of Leadership',
-          backgroundColor: 'linear-gradient(135deg, #EDE9FE, #DDD6FE)',
-          borderColor: '#8B5CF6',
-          textColor: '#5B21B6',
+          backgroundColor: 'bg-gradient-to-r from-purple-50 to-purple-100',
+          borderColor: 'border-purple-600',
+          textColor: 'text-purple-800',
           icon: '🌟',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <circle cx="20" cy="20" r="10" fill="#8B5CF6" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#5B21B6" textAnchor="middle">
-                🌟 Certificate of Leadership 🌟
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-purple-600',
         };
       case 'Innovation':
         return {
           title: 'Certificate of Innovation',
-          backgroundColor: 'linear-gradient(135deg, #FCE7F3, #FBCFE8)',
-          borderColor: '#EC4899',
-          textColor: '#9D174D',
+          backgroundColor: 'bg-gradient-to-r from-pink-50 to-pink-100',
+          borderColor: 'border-pink-600',
+          textColor: 'text-pink-800',
           icon: '💡',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect x="0" y="0" width="40" height="40" fill="#EC4899" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#9D174D" textAnchor="middle">
-                💡 Certificate of Innovation 💡
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-pink-600',
         };
       case 'Teamwork':
         return {
           title: 'Certificate of Teamwork',
-          backgroundColor: 'linear-gradient(135deg, #E0E7FF, #C7D2FE)',
-          borderColor: '#4F46E5',
-          textColor: '#3730A3',
+          backgroundColor: 'bg-gradient-to-r from-indigo-50 to-indigo-100',
+          borderColor: 'border-indigo-600',
+          textColor: 'text-indigo-800',
           icon: '🤝',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <circle cx="20" cy="20" r="10" fill="#4F46E5" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#3730A3" textAnchor="middle">
-                🤝 Certificate of Teamwork 🤝
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-indigo-600',
         };
       default:
         return {
           title: 'Certificate of Achievement',
-          backgroundColor: 'linear-gradient(135deg, #F3F4F6, #E5E7EB)',
-          borderColor: '#6B7280',
-          textColor: '#1F2937',
+          backgroundColor: 'bg-gradient-to-r from-gray-50 to-gray-100',
+          borderColor: 'border-gray-600',
+          textColor: 'text-gray-800',
           icon: '🎖️',
-          pattern: (
-            <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect x="0" y="0" width="40" height="40" fill="#6B7280" opacity="0.2" />
-            </pattern>
-          ),
-          decoration: (
-            <g>
-              <rect x="0" y="0" width="800" height="600" fill="url(#pattern)" />
-              <text x="400" y="100" fontSize="40" fontWeight="bold" fill="#1F2937" textAnchor="middle">
-                🎖️ Certificate of Achievement 🎖️
-              </text>
-            </g>
-          ),
+          ribbonColor: 'bg-gray-600',
         };
     }
   };
 
-  const { title, backgroundColor, borderColor, textColor, icon, pattern, decoration } =
+  const { title, backgroundColor, borderColor, textColor, icon, ribbonColor } =
     getCertificateDesign();
 
   return (
@@ -329,92 +246,49 @@ const CertificateGenerator = () => {
 
       {/* Certificate Design */}
       {showCertificate && (
-        <svg
+        <div
           ref={certificateRef}
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 800 600"
-          style={{
-            background: backgroundColor,
-            border: `8px solid ${borderColor}`,
-            borderRadius: '16px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            width: '100%',
-            maxWidth: '800px',
-          }}
+          className={`${backgroundColor} p-12 rounded-lg shadow-2xl text-center w-full max-w-3xl border-8 ${borderColor} relative`}
+          style={{ transform: 'translateZ(0)' }} // Fix for rendering issues
         >
-          {/* Background Pattern */}
-          {pattern}
+          {/* Ribbon */}
+          <div className={`absolute top-0 left-0 right-0 h-16 ${ribbonColor} transform -translate-y-1/2`}></div>
+          <div className={`absolute top-0 left-0 right-0 h-16 ${ribbonColor} transform -translate-y-1/2 rotate-6`}></div>
 
-          {/* Decorative Elements */}
-          {decoration}
+          {/* Title */}
+          <h1 className={`text-5xl font-bold ${textColor} mb-6 mt-8`}>{title}</h1>
 
           {/* Name */}
-          <text
-            x="400"
-            y="200"
-            fontSize="32"
-            fontWeight="semibold"
-            fill={textColor}
-            textAnchor="middle"
-          >
-            {formData.name}
-          </text>
+          <p className="text-xl text-gray-700 mb-6">This certifies that</p>
+          <p className={`text-4xl font-semibold ${textColor} mb-6`}>{formData.name}</p>
 
           {/* Issuer */}
-          <text
-            x="400"
-            y="300"
-            fontSize="24"
-            fill={textColor}
-            textAnchor="middle"
-          >
-            Issued by: {formData.issuer}
-          </text>
+          <p className="text-xl text-gray-700 mb-6">has successfully demonstrated</p>
+          <p className={`text-3xl font-bold ${textColor} mb-6`}>{formData.certificateType}</p>
 
           {/* Completion Date */}
-          <text
-            x="400"
-            y="350"
-            fontSize="24"
-            fill={textColor}
-            textAnchor="middle"
-          >
-            Completion Date: {formData.completionDate}
-          </text>
+          <p className="text-xl text-gray-700 mb-6">on this day, {formData.completionDate}</p>
 
-          {/* Signature */}
-          <text
-            x="200"
-            y="450"
-            fontSize="20"
-            fill={textColor}
-            textAnchor="middle"
-          >
-            Signature: {formData.signature}
-          </text>
+          {/* Issuer */}
+          <p className="text-xl text-gray-700 mb-6">Issued by: {formData.issuer}</p>
 
-          {/* Issue Date */}
-          <text
-            x="600"
-            y="450"
-            fontSize="20"
-            fill={textColor}
-            textAnchor="middle"
-          >
-            Issue Date: {formData.issueDate}
-          </text>
+          {/* Signature and Issue Date */}
+          <div className="mt-12 flex justify-between items-center">
+            <div className="text-center">
+              <div className="h-1 w-24 bg-gray-700 mx-auto mb-2"></div>
+              <p className="text-gray-700">{formData.signature}</p>
+            </div>
+            <div className="text-center">
+              <div className="h-1 w-24 bg-gray-700 mx-auto mb-2"></div>
+              <p className="text-gray-700">{formData.issueDate}</p>
+            </div>
+          </div>
 
           {/* Icon */}
-          <text
-            x="750"
-            y="50"
-            fontSize="48"
-            fill={textColor}
-            textAnchor="end"
-          >
+          <div className="absolute top-4 right-4 text-6xl">
             {icon}
-          </text>
-        </svg>
+          </div>
+        </div>
       )}
 
       {/* Download Button */}
